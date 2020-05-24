@@ -1,6 +1,6 @@
-0bd8eeffddfede95bf056bd66c0176e1 *DESCRIPTION
+5af7c938677c89be97f0dbb501a28ab6 *DESCRIPTION
 3c48ee11b72ddcfa5a49a35b26bc6f9c *NAMESPACE
-dee7db4997fe0c4a8e7f5738094d86f0 *NEWS
+7ef45cb645a5521569643da70374bb8e *NEWS
 a37e350a9e55d5cf0097d3bce4baf1a5 *R/aggregateStochasticAlgoRuns.R
 ee1ac5b6657c45cddba6007271764146 *R/checkDuplicatedInstances.R
 1666b863226e4c2ab2aed289f80a4c91 *R/convertAlgoPerfToWideFormat.R
@@ -26,7 +26,7 @@ f77af5a1c74e7d5733db8c89ce802214 *R/getEDAAlgoPerf.R
 cd1f20b7d9ae327b7e0c862649ea84fe *R/imputeAlgoPerf.R
 659e13b1c883e23fe7f663ec085f273b *R/imputeZeroVals.R
 10dde45204b82f3af5ab9f58ffd0d968 *R/parseASScenario.R
-05d02420fe462c7b56e1e096b7985521 *R/parseDescription.R
+7e850d9293753a8e64c9f21aa560ec46 *R/parseDescription.R
 e8844d06e342b73c858c0e7c2a2b5f59 *R/plotAlgoCorMatrix.R
 51ce9f618cc666c7d86e837de7c062d6 *R/plotAlgoPerfADoc.R
 6c07ea21def2581e500de1ff5769fbd7 *R/plotAlgoPerfBoxplots.R
