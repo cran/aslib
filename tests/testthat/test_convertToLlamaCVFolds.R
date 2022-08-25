@@ -21,4 +21,12 @@ test_that("convertToLlamaCVFolds check matching", {
     iid2 = as.character(subset(folds, folds$fold == i)$instance_id)
     expect_true(setequal(iid1, iid2))
   }
+
+  folds = createCVSplits(testscenario6, folds = 2L, reps = 1L)
+  llama.scenario = convertToLlamaCVFolds(testscenario6, cv.splits = folds)
+  for (i in unique(folds$fold)) {
+    iid1 = as.character(llama.scenario$data[llama.scenario$test[[i]],]$instance_id)
+    iid2 = as.character(subset(folds, folds$fold == i)$instance_id)
+    expect_true(setequal(iid1, iid2))
+  }
 })

@@ -4,8 +4,14 @@
 \alias{imputeAlgoPerf}
 \title{Imputes algorithm performance for runs which have NA performance values.}
 \usage{
-imputeAlgoPerf(asscenario, measure, base = NULL, range.scalar = 0.3,
-  jitter = 0, impute.zero.vals = FALSE)
+imputeAlgoPerf(
+  asscenario,
+  measure,
+  base = NULL,
+  range.scalar = 0.3,
+  jitter = 0,
+  impute.zero.vals = FALSE
+)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
@@ -45,4 +51,3 @@ With \code{range.span = max - min}.
 Returns an object like \code{algo.runs} of \code{asscenario}, but drops
 the runstatus and all other measures.
 }
-

@@ -28,4 +28,3 @@ The feature columns are in the same order as \dQuote{features_deterministic},
 code{NA} means the performance value is not available, possibly because the algorithm run was aborted.
 The data.frame is sorted by \dQuote{instance_id}, then \dQuote{repetition}.
 }
-

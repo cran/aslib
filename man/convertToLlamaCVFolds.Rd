@@ -4,7 +4,13 @@
 \alias{convertToLlamaCVFolds}
 \title{Convert an ASScenario scenario object to a llama data object with cross-validation folds.}
 \usage{
-convertToLlamaCVFolds(asscenario, measure, feature.steps, cv.splits)
+convertToLlamaCVFolds(
+  asscenario,
+  measure,
+  feature.steps,
+  algorithm.feature.steps,
+  cv.splits
+)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
@@ -15,8 +21,13 @@ Measure to use for modelling.
 Default is first measure in scenario.}
 
 \item{feature.steps}{[\code{character}]\cr
-Which feature steps are allowed?
-Default are the default feature steps or all steps
+Which instance feature steps are allowed?
+Default are the default instance feature steps or all steps
+in case no defaults were defined.}
+
+\item{algorithm.feature.steps}{[\code{character}]\cr
+Which algorithm feature steps are allowed?
+Default are the default algorithm feature steps or all steps
 in case no defaults were defined.}
 
 \item{cv.splits}{[\code{data.frame}]\cr
@@ -31,4 +42,3 @@ Result of calling \code{\link[llama]{input}} with data partitioned into folds.
 For features, mean values are computed across repetitions.
 For algorithms, repetitions are not supported at the moment and will result in an error.
 }
-

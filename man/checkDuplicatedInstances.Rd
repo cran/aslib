@@ -18,4 +18,3 @@ Algorithm selection scenario.}
 Potentially duplicated instances are detected by grouping all instances
 with equal feature vectors.
 }
-

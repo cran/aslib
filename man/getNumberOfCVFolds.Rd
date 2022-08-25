@@ -16,4 +16,3 @@ Algorithm selection scenario.}
 \description{
 Returns number of CV folds.
 }
-

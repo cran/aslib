@@ -23,4 +23,3 @@ and parsed with \code{parseASScenario}.
   sc = getCosealASScenario("CSP-2010")
 }
 }
-

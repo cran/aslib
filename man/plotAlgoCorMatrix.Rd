@@ -4,8 +4,13 @@
 \alias{plotAlgoCorMatrix}
 \title{Plots the correlation matrix of the algorithms.}
 \usage{
-plotAlgoCorMatrix(asscenario, measure, order.method = "hclust",
-  hclust.method = "ward.D2", cor.method = "spearman")
+plotAlgoCorMatrix(
+  asscenario,
+  measure,
+  order.method = "hclust",
+  hclust.method = "ward.D2",
+  cor.method = "spearman"
+)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
@@ -50,4 +55,3 @@ the worst performance for all others.
 
 Stochastic replications are aggregated by the mean value.
 }
-

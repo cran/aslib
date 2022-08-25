@@ -19,45 +19,58 @@
 convertToLlama = function(asscenario, measure, feature.steps) {
   ch = convertToCheck(asscenario, measure, feature.steps, TRUE)
   measure = ch$measure; feature.steps = ch$feature.steps
-
+  
   # check dependencies of requested feature steps
   deps = unlist(lapply(asscenario$desc$feature_steps[feature.steps], function(d) d$requires))
+  deps = c(deps, unlist(lapply(asscenario$desc$algorithm_feature_steps[feature.steps], function(d) d$requires)))
   for (d in deps) {
     if (!(d %in% feature.steps)) {
-        stopf(paste("Feature step dependency", d, "not satisfied!"))
+      stopf(paste("Feature step dependency", d, "not satisfied!"))
     }
   }
-  feats = convertFeats(asscenario, with.instance.id = TRUE)
+  
+  feats = convertFeats(asscenario, with.id = TRUE, type = "instance")
   # subset to features used in requested feature steps
   tosel = as.vector(unlist(lapply(asscenario$desc$feature_steps[feature.steps], function(d) d$provides)))
   # some features may have been removed by conversion/imputation
   tosel = intersect(names(feats), tosel)
-
   feats = feats[c("instance_id", tosel)]
+  
+  algo.feats = convertFeats(asscenario, feature.steps = feature.steps, with.id = TRUE, type = "algorithm")
+  # subset to features used in requested feature steps
+  algo.tosel = as.vector(unlist(lapply(asscenario$desc$algorithm_feature_steps[feature.steps], function(d) d$provides)))
+  # some features may have been removed by conversion/imputation
+  algo.tosel = intersect(names(algo.feats), algo.tosel)
+  algo.feats = algo.feats[c("algorithm", algo.tosel)]
+  
+  
   cp = convertPerf(asscenario, measure = measure, feature.steps = feature.steps,
-    add.feature.costs = FALSE, with.instance.id = TRUE)
-
+                   add.feature.costs = FALSE, with.instance.id = TRUE)
+  
+  #FIXME: add algorithm feature costs
   if(!is.null(asscenario$feature.costs)) {
-      # set all unknown feature costs (i.e. for feature steps that didn't run) to 0
-      asscenario$feature.costs[is.na(asscenario$feature.costs)] = 0
-      costs = list(groups = lapply(asscenario$desc$feature_steps[feature.steps], function(d) d$provides),
-          values=asscenario$feature.costs[,c("instance_id", feature.steps)])
-      ldf = input(feats, cp$perf, successes = cp$successes,
-          minimize = as.logical(!asscenario$desc$maximize[measure]), costs = costs)
+    algorithm.feature.steps = intersect(feature.steps, names(asscenario$desc[["algorithm_feature_steps"]]))
+    instance.feature.steps = intersect(feature.steps, names(asscenario$desc[["feature_steps"]]))
+    # set all unknown feature costs (i.e. for feature steps that didn't run) to 0
+    asscenario$feature.costs[is.na(asscenario$feature.costs)] = 0
+    costs = list(groups = lapply(asscenario$desc$feature_steps[instance.feature.steps], function(d) d$provides),
+                 values=asscenario$feature.costs[,c("instance_id", instance.feature.steps)])
+    ldf = input(feats, cp$perf, algorithmFeatures = algo.feats, successes = cp$successes,
+                minimize = as.logical(!asscenario$desc$maximize[measure]), costs = costs)
   } else {
-      ldf = input(feats, cp$perf, successes = cp$successes,
-          minimize = as.logical(!asscenario$desc$maximize[measure]))
+    ldf = input(feats, cp$perf, algorithmFeatures = algo.feats, successes = cp$successes,
+                minimize = as.logical(!asscenario$desc$maximize[measure]))
   }
-
+  
   # LLAMA set the best algorithm for instances that were not solved by anything to NA,
   # set those to the single best solver over the entire set
   sb = as.character(singleBest(ldf)[1,]$algorithm)
   for(i in seq_along(ldf$best)) {
     if(all(sapply(ldf$best[[i]], is.na))) {
-        ldf$best[[i]] = sb
+      ldf$best[[i]] = sb
     }
   }
-
+  
   return(ldf)
 }
 
@@ -82,39 +95,57 @@ convertToLlama = function(asscenario, measure, feature.steps) {
 #'        performances.
 #' @export
 fixFeckingPresolve = function(asscenario, ldf) {
-    presolvedGroups = names(asscenario$feature.runstatus)[apply(asscenario$feature.runstatus, 2, function(x) { any(x == "presolved") })]
-    usedGroups = subset(names(asscenario$desc$feature_steps),
-        sapply(names(asscenario$desc$feature_steps),
-            function(x) {
-                length(intersect(asscenario$desc$feature_steps[[x]]$provides, ldf$features)) > 0
-            }))
-    # are we using any of the feature steps that cause presolving?
-    if(length(intersect(presolvedGroups, usedGroups)) > 0) {
-        presolved = asscenario$feature.runstatus[apply(subset(asscenario$feature.runstatus, TRUE, usedGroups), 1, function(x) { any(x == "presolved") }),]
-        if(nrow(presolved) > 0) {
-            presolvedTimes = sapply(rownames(presolved), function(x) {
-                pCosts = subset(asscenario$feature.costs[x,], T, presolved[x,] == "presolved")
-                pCosts = pCosts[intersect(names(pCosts), usedGroups)]
-                pCosts[is.na(pCosts)] = 0
-                as.numeric(pCosts[1])
-            })
-            rows = na.omit(match(presolved$instance_id, ldf$data$instance_id))
-            if(length(rows) > 0) {
-                ts = presolvedTimes[na.omit(match(ldf$data$instance_id, presolved$instance_id))]
-                ldf$data[rows,ldf$performance] = ts
-                ldf$data[rows,ldf$success] = T
-                if(length(ldf$test) > 0) {
-                    for(i in 1:length(ldf$test)) {
-                        rows = na.omit(match(presolved$instance_id, ldf$data[ldf$test[[i]],]$instance_id))
-                        if(length(rows) > 0) {
-                            ts = presolvedTimes[na.omit(match(ldf$data[ldf$test[[i]],]$instance_id, presolved$instance_id))]
-                            ldf$data[ldf$test[[i]],][rows,ldf$performance] = ts
-                            ldf$data[ldf$test[[i]],][rows,ldf$success] = T
-                        }
-                    }
-                }
-            }
+  presolvedGroups = names(asscenario$feature.runstatus)[apply(asscenario$feature.runstatus, 2, function(x) { any(x == "presolved") })]
+  usedGroups = subset(names(asscenario$desc$feature_steps),
+    sapply(names(asscenario$desc$feature_steps),
+      function(x) {
+        length(intersect(asscenario$desc$feature_steps[[x]]$provides, ldf$features)) > 0
+        }))
+  # are we using any of the feature steps that cause presolving?
+  if(length(intersect(presolvedGroups, usedGroups)) > 0) {
+    presolved = asscenario$feature.runstatus[apply(subset(asscenario$feature.runstatus, TRUE, usedGroups), 1, function(x) { any(x == "presolved") }),]
+    if(nrow(presolved) > 0) {
+      presolvedTimes = sapply(rownames(presolved), function(x) {
+        pCosts = subset(asscenario$feature.costs[x,], T, presolved[x,] == "presolved")
+        pCosts = pCosts[intersect(names(pCosts), usedGroups)]
+        pCosts[is.na(pCosts)] = 0
+        as.numeric(pCosts[1])
+      })
+      if(is.null(ldf$algorithmFeatures)) {
+        rows = na.omit(match(presolved$instance_id, ldf$data$instance_id))
+      } else {
+        rows = rownames(ldf$data[ldf$data$instance_id %in% presolved$instance_id, ])
+      }
+      
+      if(length(rows) > 0) {
+        ts = presolvedTimes[na.omit(match(ldf$data$instance_id, presolved$instance_id))]
+        if(is.null(ldf$algorithmFeatures)) {
+          ldf$data[rows,ldf$performance] = ts
+        } else {
+          ldf$data[rows,ldf$performance] = ts
         }
+        ldf$data[rows,ldf$success] = T
+        
+        if(length(ldf$test) > 0) {
+          for(i in 1:length(ldf$test)) {
+            if(is.null(ldf$algorithmFeatures)) {
+              rows = na.omit(match(presolved$instance_id, ldf$data[ldf$test[[i]],]$instance_id))
+            } else {
+              rows = rownames(ldf$data[ldf$test[[i]],][ldf$data[ldf$test[[i]],]$instance_id %in% presolved$instance_id,])
+            }
+            if(length(rows) > 0) {
+              ts = presolvedTimes[na.omit(match(ldf$data[ldf$test[[i]],]$instance_id, presolved$instance_id))]
+              if(is.null(ldf$algorithmFeatures)) {
+                ldf$data[ldf$test[[i]],][rows,ldf$performance] = ts
+              } else {
+                ldf$data[ldf$test[[i]],][rows,ldf$performance] = ts
+              }
+              ldf$data[ldf$test[[i]],][rows,ldf$success] = T
+            }
+          }
+        }
+      }
     }
-    return(ldf)
+  }
+  return(ldf)
 }

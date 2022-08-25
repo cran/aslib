@@ -9,8 +9,12 @@
 #'   Measure to use for modelling.
 #'   Default is first measure in scenario.
 #' @param feature.steps [\code{character}]\cr
-#'   Which feature steps are allowed?
-#'   Default are the default feature steps or all steps
+#'   Which instance feature steps are allowed?
+#'   Default are the default instance feature steps or all steps
+#'   in case no defaults were defined.
+#' @param algorithm.feature.steps [\code{character}]\cr
+#'   Which algorithm feature steps are allowed?
+#'   Default are the default algorithm feature steps or all steps
 #'   in case no defaults were defined.
 #' @param cv.splits [\code{data.frame}]\cr
 #'   Data frame defining the split of the data into cross-validation folds,
@@ -18,7 +22,7 @@
 #'   Default are the splits \code{asscenario$cv.splits}
 #' @return Result of calling \code{\link[llama]{input}} with data partitioned into folds.
 #' @export
-convertToLlamaCVFolds = function(asscenario, measure, feature.steps, cv.splits) {
+convertToLlamaCVFolds = function(asscenario, measure, feature.steps, algorithm.feature.steps, cv.splits) {
   assertClass(asscenario, "ASScenario")
   if (missing(measure))
     measure = asscenario$desc$performance_measures[1]
@@ -29,10 +33,12 @@ convertToLlamaCVFolds = function(asscenario, measure, feature.steps, cv.splits) 
   else
     assertClass(cv.splits, "data.frame")
   allsteps = names(asscenario$desc$feature_steps)
-  if (missing(feature.steps))
+  algo.allsteps = names(asscenario$desc$algorithm_feature_steps)
+  if (missing(feature.steps)) {
     feature.steps = getDefaultFeatureStepNames(asscenario)
+  }
   else
-    assertSubset(feature.steps, allsteps)
+    assertSubset(feature.steps, c(allsteps, algo.allsteps))
 
   reps = max(cv.splits$repetition)
   if (reps > 1L)

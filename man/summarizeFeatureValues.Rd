@@ -4,11 +4,14 @@
 \alias{summarizeFeatureValues}
 \title{Creates summary data.frame for feature values across all instances.}
 \usage{
-summarizeFeatureValues(asscenario)
+summarizeFeatureValues(asscenario, type)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
 Algorithm selection scenario.}
+
+\item{type}{[\code{character(1)}]\cr
+Feature type (instance or algorithmic).}
 }
 \value{
 [\code{data.frame}].
@@ -16,4 +19,3 @@ Algorithm selection scenario.}
 \description{
 Creates summary data.frame for feature values across all instances.
 }
-

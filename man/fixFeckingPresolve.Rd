@@ -30,4 +30,3 @@ They are *not* done on the training data. This function should only ever be
 used to evaluate the performance of an actual selector that uses features
 (i.e. not VBS or single best). Using it in polite company is to be avoided.
 }
-

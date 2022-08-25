@@ -21,4 +21,3 @@ saves those data sets as single ARFF files in the given directory.
 \seealso{
 \code{\link{parseASScenario}}
 }
-

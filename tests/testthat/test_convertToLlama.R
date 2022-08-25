@@ -3,15 +3,15 @@ context("convertToLlama")
 test_that("convertToLlama", {
   skip_on_cran()
   llama.scenario = convertToLlama(testscenario3)
-  expect_equal(llama.scenario$data$instance_id, as.factor(c("i1", "i2", "i3")))
+  expect_equal(llama.scenario$data$instance_id, c("i1", "i2", "i3"))
   expect_equal(llama.scenario$data$f1, testscenario3$feature.values$f1)
   expect_equal(llama.scenario$data$f2, testscenario3$feature.values$f2)
   expect_equal(llama.scenario$data$f3, testscenario3$feature.values$f3)
-  expect_equal(llama.scenario$data$instance_id, as.factor(c("i1", "i2", "i3")))
+  expect_equal(llama.scenario$data$instance_id, c("i1", "i2", "i3"))
   expect_equal(llama.scenario$data$a1_success, c(TRUE, TRUE, TRUE))
   expect_equal(llama.scenario$data$a2_success, c(TRUE, TRUE, FALSE))
   expect_equal(llama.scenario$data$a1, c(30, 90, 70))
-  expect_equal(llama.scenario$data$a2, c(50, 30, 100))
+  expect_equal(llama.scenario$data$a2, c(50, 30, 100)) 
   expect_equal(llama.scenario$best, c("a1", "a2", "a1"))
 
   lrn = makeLearner("classif.rpart")
@@ -57,6 +57,18 @@ test_that("convertToLlama parses real scenario correctly take 2", {
   expect_equal(llama.scenario$success, paste0(names(testscenario2$desc$metainfo_algorithms), "_success"))
   expect_equal(length(llama.scenario$features), 113)
   expect_equal(length(llama.scenario$best), 1167)
+})
+
+test_that("convertToLlama parses real scenario correctly take 3", {
+  llama.scenario = convertToLlama(testscenario6)
+  iid1 = as.character(llama.scenario$data$instance_id)
+  iid2 = as.character(testscenario6$algo.runs$instance_id)
+  expect_true(setequal(iid1, iid2))
+  expect_equal(llama.scenario$algorithmNames, names(testscenario6$desc$metainfo_algorithms))
+  expect_equal(llama.scenario$success, "success")
+  expect_equal(length(llama.scenario$features), 48)
+  expect_equal(length(llama.scenario$algorithmFeatures), 53)
+  expect_equal(length(llama.scenario$best), 353)
 })
 
 test_that("convertToLlama handles costs correctly", {

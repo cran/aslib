@@ -16,4 +16,3 @@ Algorithm selection scenario.}
 \description{
 Creates summary data.frame for algorithm runstatus across all instances.
 }
-

@@ -4,9 +4,15 @@
 \alias{runLlamaModels}
 \title{Creates a registry which can be used for running several Llama models on a cluster.}
 \usage{
-runLlamaModels(asscenarios, feature.steps.list = NULL, baselines = NULL,
-  learners = list(), par.sets = list(), rs.iters = 100L,
-  n.inner.folds = 2L)
+runLlamaModels(
+  asscenarios,
+  feature.steps.list = NULL,
+  baselines = NULL,
+  learners = list(),
+  par.sets = list(),
+  rs.iters = 100L,
+  n.inner.folds = 2L
+)
 }
 \arguments{
 \item{asscenarios}{[(list of) \code{\link{ASScenario}}]\cr
@@ -40,7 +46,7 @@ Number of cross-validation folds for inner CV in hyperparameter tuning.
 Default is 2L.}
 }
 \value{
-BatchExperiments registry.
+batchtools registry.
 }
 \description{
 It is likely that you need to install some additional R packages for this from CRAN or extra
@@ -48,4 +54,3 @@ Weka learner. The latter can be done via e.g. \code{WPM("install-package", "XMea
 
 Feature costs are added for real prognostic models but not for baseline models.
 }
-

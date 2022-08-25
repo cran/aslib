@@ -82,6 +82,46 @@ test_that("parseASScenario2", {
   expect_equal(testscenario2$desc$scenario_id, "SAT12-INDU")
 })
 
+test_that("parseASScenario6", {
+  expect_true(inherits(testscenario6, "ASScenario"))
+
+  expect_equal(dim(testscenario6$algo.runs), c(2824, 5))
+  expect_equal(dim(testscenario6$algo.runstatus), c(353, 10))
+  expect_equal(dim(testscenario6$cv.splits), c(353, 3))
+  expect_equal(dim(testscenario6$feature.costs), NULL)
+  expect_equal(dim(testscenario6$feature.runstatus), c(353, 3))
+  expect_equal(dim(testscenario6$feature.values), c(353, 52))
+  expect_equal(dim(testscenario6$algorithm.feature.costs), NULL)
+  expect_equal(dim(testscenario6$algorithm.feature.runstatus), c(8, 4))
+  expect_equal(dim(testscenario6$algorithm.feature.values), c(8, 77))
+  
+
+  expect_equal(length(testscenario6$desc$features_deterministic), 50)
+  expect_equal(length(testscenario6$desc$feature_steps), 1)
+  nams = names(testscenario6$desc$feature_steps)
+  expect_equal(length(testscenario6$desc$feature_steps[[nams[1]]]$provides), 50)
+  expect_equal(testscenario6$desc$algorithm_cutoff_memory, as.numeric(NA))
+  expect_equal(testscenario6$desc$algorithm_cutoff_time, 5000)
+  expect_equal(names(testscenario6$desc$metainfo_algorithms), c("inIDGlucose", "glu_mix", "gluHack", "Glucose_Hack_Kiel_fastBVE", "glucose.3.0_PADC_3", 
+                                                                "glucose.3.0_PADC_10", "GHackCOMSPS_drup", "glucose3.0"))
+  expect_equal(testscenario6$desc$default_steps, c("ALL", "code", "AST"))
+  expect_equal(testscenario6$desc$features_cutoff_memory, as.numeric(NA))
+  expect_equal(testscenario6$desc$features_cutoff_time, as.numeric(NA))
+  expect_equal(testscenario6$desc$features_stochastic, character(0))
+  expect_equal(testscenario6$desc$algorithm_features_cutoff_memory, as.numeric(NA))
+  expect_equal(testscenario6$desc$algorithm_features_cutoff_time, as.numeric(NA))
+  expect_equal(testscenario6$desc$algorithm_features_stochastic, character(0))
+  val = FALSE
+  names(val) = "runtime"
+  expect_equal(testscenario6$desc$maximize, val)
+  expect_equal(testscenario6$desc$number_of_feature_steps, 3)
+  expect_equal(testscenario6$desc$performance_measures, "runtime")
+  val = "runtime"
+  names(val) = "runtime"
+  expect_equal(testscenario6$desc$performance_type, val)
+  expect_equal(testscenario6$desc$scenario_id, "GLUHACK-18-ALGO")
+})
+
 test_that("parseASScenario checks feature runstatus levels", {
   expect_error(parseASScenario(file.path("broken-status-levels")),
     "Feature runstatus file contains illegal levels:")

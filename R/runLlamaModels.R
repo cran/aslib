@@ -29,7 +29,7 @@
 #' @param n.inner.folds [\code{integer(1)}]\cr
 #'   Number of cross-validation folds for inner CV in hyperparameter tuning.
 #'   Default is 2L.
-#' @return BatchExperiments registry.
+#' @return batchtools registry.
 #' @export
 runLlamaModels = function(asscenarios, feature.steps.list = NULL, baselines = NULL,
   learners = list(), par.sets = list(), rs.iters = 100L, n.inner.folds = 2L) {
@@ -68,7 +68,7 @@ runLlamaModels = function(asscenarios, feature.steps.list = NULL, baselines = NU
   rs.iters = asInt(rs.iters, lower = 1L)
   n.inner.folds = asInt(n.inner.folds, lower = 2L)
 
-  packs = c("RWeka", "llama", "methods", "ParamHelpers", "mlr", "BatchExperiments")
+  packs = c("RWeka", "llama", "methods", "ParamHelpers", "mlr", "batchtools")
   requirePackages(packs, why = "runLlamaModels")
 
   llama.scenarios = mapply(convertToLlama, asscenario = asscenarios,
@@ -78,8 +78,8 @@ runLlamaModels = function(asscenarios, feature.steps.list = NULL, baselines = NU
   # FIXME:
   unlink("run_llama_models-files", recursive = TRUE)
   reg = makeExperimentRegistry("run_llama_models", packages = packs)
-  batchExport(reg, fixFeckingPresolve = fixFeckingPresolve, doNestedCVWithTuning = doNestedCVWithTuning,
-    tuneLlamaModel = tuneLlamaModel)
+  batchExport(reg = reg, export = list(fixFeckingPresolve = fixFeckingPresolve,
+                doNestedCVWithTuning = doNestedCVWithTuning, tuneLlamaModel = tuneLlamaModel))
 
   for (i in seq_along(asscenarios)) {
     asscenario = asscenarios[[i]]
@@ -90,54 +90,55 @@ runLlamaModels = function(asscenarios, feature.steps.list = NULL, baselines = NU
     } else {
       NULL
     }
-    addProblem(reg, id = desc$scenario_id,
-      static = list(
-        asscenario = asscenario,
-        feature.steps = feature.steps.list[[desc$scenario_id]],
-        timeout = timeout,
-        llama.scenario = llama.scenarios[[i]],
-        llama.cv = llama.cvs[[i]],
-        n.algos = length(getAlgorithmNames(asscenario)),
-        rs.iters = rs.iters,
-        n.inner.folds = n.inner.folds,
-        makeRes = function(data, p, timeout, addCosts) {
-          if (addCosts) {
-            data = fixFeckingPresolve(asscenario, data)
-          }
-          list(
-            predictions = p$predictions,
-            succ = mean(successes(data, p, timeout = timeout, addCosts = addCosts)),
-            par10 = mean(parscores(data, p, timeout = timeout, addCosts = addCosts)),
-            mcp = mean(misclassificationPenalties(data, p))
-          )
-        }
-      )
+    addProblem(reg = reg, name = desc$scenario_id,
+     data = list(
+       asscenario = asscenario,
+       feature.steps = feature.steps.list[[desc$scenario_id]],
+       timeout = timeout,
+       llama.scenario = llama.scenarios[[i]],
+       llama.cv = llama.cvs[[i]],
+       n.algos = length(getAlgorithmNames(asscenario)),
+       rs.iters = rs.iters,
+       n.inner.folds = n.inner.folds,
+       makeRes = function(data, p, timeout, addCosts) {
+         if (addCosts) {
+           data = fixFeckingPresolve(asscenario, data)
+         }
+         list(
+           predictions = p$predictions,
+           succ = mean(successes(data, p, timeout = timeout, addCosts = addCosts)),
+           par10 = mean(parscores(data, p, timeout = timeout, addCosts = addCosts)),
+           mcp = mean(misclassificationPenalties(data, p))
+         )
+       }
+     ), fun = NULL
     )
   }
 
   # add baselines to reg
   if (length(baselines) > 0L) {
-    addAlgorithm(reg, id = "baseline", fun = function(static, type) {
+    addAlgorithm(reg = reg, name = "baseline", fun = function(data, job, instance, type, ...) {
       llama.fun = get(type, envir = asNamespace("llama"))
-      p = llama.fun(data = static$llama.scenario)
+      p = llama.fun(data = data$llama.scenario)
       p = list(predictions = p)
       # this is how LLAMA checks what type of argument is given to the evaluation function
       attr(p, "hasPredictions") = TRUE
-      static$makeRes(static$llama.scenario, p, static$timeout, FALSE)
+      data$makeRes(data$llama.scenario, p, data$timeout, FALSE)
     })
-    des = makeDesign("baseline", exhaustive = list(type = baselines))
-    addExperiments(reg, algo.designs = des)
+    des = list()
+    des$baseline = data.table::data.table(type = baselines)
+    addExperiments(reg = reg, algo.designs = des)
   }
 
   # add real selectors
   addLearnerAlgoAndExps = function(lrn, par.set) {
     # BE does not like the dots in mlr ids
     id = str_replace_all(lrn$id, "\\.", "_")
-    addAlgorithm(reg, id = id, fun = function(static) {
+    addAlgorithm(reg = reg, name = id, fun = function(data, job, instance, ...) {
       llama.fun = switch(lrn$type,
-        classif = llama::classify,
-        regr = llama::regression,
-        cluster = llama::cluster
+                         classif = llama::classify,
+                         regr = llama::regression,
+                         cluster = llama::cluster
       )
       if (lrn$type == "cluster") {
         pre = llama::normalize
@@ -147,13 +148,19 @@ runLlamaModels = function(asscenarios, feature.steps.list = NULL, baselines = NU
         }
       }
       p = if (ParamHelpers::isEmpty(par.set))
-        llama.fun(lrn, data = static$llama.cv, pre = pre)
+        llama.fun(lrn, data = data$llama.cv, pre = pre)
       else
-        doNestedCVWithTuning(static$asscenario, static$llama.cv, pre, static$timeout,
-          lrn, par.set, llama.fun, static$rs.iters, static$n.inner.folds)
-      static$makeRes(static$llama.cv, p, static$timeout, TRUE)
+        doNestedCVWithTuning(data$asscenario, data$llama.cv, pre, data$timeout,
+                             lrn, par.set, llama.fun, data$rs.iters, data$n.inner.folds)
+      data$makeRes(data$llama.cv, p, data$timeout, TRUE)
     })
-    addExperiments(reg, algo.designs = id)
+
+    # empty design for algorithm
+    algo.designs = vector(mode = "list", length = 1L)
+    algo.designs[[1]] = data.table::data.table(type = NULL)
+    names(algo.designs) = id
+
+    addExperiments(reg = reg, algo.designs = algo.designs)
   }
 
   if (length(learners) > 0L)

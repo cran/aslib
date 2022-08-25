@@ -35,4 +35,3 @@ the worst performance for all others.
 
 Stochastic replications are aggregated by the mean value.
 }
-

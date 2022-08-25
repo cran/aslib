@@ -34,9 +34,11 @@ getStatistics = function(x) {
   sapply(funs, function(f) f(x))
 }
 
-removeConstScenFeats = function(feats) {
-  iid = feats$instance_id
-  task = makeClusterTask(data = dropNamed(feats, "instance_id"))
+removeConstScenFeats = function(feats, id) {
+  iid = feats[[id]]
+  task = makeClusterTask(data = dropNamed(feats, id))
   task = removeConstantFeatures(task, na.ignore = TRUE, show.info = TRUE)
-  cbind(instance_id = iid, getTaskData(task))
+  data = cbind(id = iid, getTaskData(task))
+  colnames(data)[1] = id
+  return(data)
 }

@@ -4,11 +4,14 @@
 \alias{getFeatureNames}
 \title{Returns feature names of scenario.}
 \usage{
-getFeatureNames(asscenario)
+getFeatureNames(asscenario, type)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
 Algorithm selection scenario.}
+
+\item{type}{[\code{character(1)}]
+Feature type (instance or algorithmic).}
 }
 \value{
 [\code{character}].
@@ -16,4 +19,3 @@ Algorithm selection scenario.}
 \description{
 Returns feature names of scenario.
 }
-

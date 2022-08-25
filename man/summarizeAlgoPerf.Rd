@@ -20,4 +20,3 @@ Default is first measure in scenario.}
 \description{
 Creates summary data.frame for algorithm performance values across all instances.
 }
-

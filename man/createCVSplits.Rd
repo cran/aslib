@@ -38,4 +38,3 @@ and potentially store it in an ARFF file.
 The \code{mlr} package is used to generate the splits, see
 \code{\link[mlr]{makeResampleDesc}} and \code{\link[mlr]{makeResampleInstance}}.
 }
-

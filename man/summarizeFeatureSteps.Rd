@@ -16,4 +16,3 @@ Algorithm selection scenario.}
 \description{
 Creates a data.frame that summarizes the feature steps.
 }
-

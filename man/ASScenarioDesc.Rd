@@ -15,10 +15,11 @@ Object members
   \dQuote{solution_quality}.}
 \item{algorithm_cutoff_time [\code{numeric(1)}]}{Cutoff time for an algorithm run.}
 \item{algorithm_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an algorithm run.}
-\item{features_cutoff_time [\code{numeric(1)}]}{Cutoff time for a feature run.}
-\item{features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for a feature run.}
+\item{features_cutoff_time [\code{numeric(1)}]}{Cutoff time for an instance feature run.}
+\item{features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an instance feature run.}
+\item{algorithm_features_cutoff_time [\code{numeric(1)}]}{Cutoff time for an algorithm feature run.}
+\item{algorithm_features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an algorithm feature run.}
 \item{feature_steps [named \code{list} of \code{character}]}{Names of feature processing steps, the other feature steps they require, and the features they provide.}
 \item{metainfo_algorithms [named \code{list} of lists of \code{character}]}{Names of algorithms and meta-information about them.}
 }
 }
-

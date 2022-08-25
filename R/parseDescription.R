@@ -10,8 +10,10 @@
 #'   \dQuote{solution_quality}.}
 #' \item{algorithm_cutoff_time [\code{numeric(1)}]}{Cutoff time for an algorithm run.}
 #' \item{algorithm_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an algorithm run.}
-#' \item{features_cutoff_time [\code{numeric(1)}]}{Cutoff time for a feature run.}
-#' \item{features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for a feature run.}
+#' \item{features_cutoff_time [\code{numeric(1)}]}{Cutoff time for an instance feature run.}
+#' \item{features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an instance feature run.}
+#' \item{algorithm_features_cutoff_time [\code{numeric(1)}]}{Cutoff time for an algorithm feature run.}
+#' \item{algorithm_features_cutoff_memory [\code{numeric(1)}]}{Cutoff memory for an algorithm feature run.}
 #' \item{feature_steps [named \code{list} of \code{character}]}{Names of feature processing steps, the other feature steps they require, and the features they provide.}
 #' \item{metainfo_algorithms [named \code{list} of lists of \code{character}]}{Names of algorithms and meta-information about them.}
 #' }
@@ -26,7 +28,10 @@ parseDescription = function(path) {
   # do not warn about EOL
   desc = yaml.load_file(file.path(path, "description.txt"))
 
-  assertSubset(c("scenario_id", "performance_measures", "maximize", "performance_type", "algorithm_cutoff_time", "algorithm_cutoff_memory", "features_cutoff_time", "features_cutoff_memory", "features_deterministic", "features_stochastic", "number_of_feature_steps", "default_steps", "feature_steps", "metainfo_algorithms"), names(desc))
+  assertSubset(c("scenario_id", "performance_measures", "maximize", "performance_type", 
+                 "algorithm_cutoff_time", "algorithm_cutoff_memory", "features_cutoff_time", 
+                 "features_cutoff_memory", "features_deterministic", "features_stochastic", 
+                 "number_of_feature_steps", "default_steps", "feature_steps", "metainfo_algorithms"), names(desc))
 
   # now handle all non-scalar strings and convert them to proper data types
   convertField = function(name, cast = as.character) {
@@ -48,6 +53,10 @@ parseDescription = function(path) {
   convertField("features_cutoff_memory", as.numeric)
   convertField("features_deterministic", make.names)
   convertField("features_stochastic", make.names)
+  convertField("algorithm_features_cutoff_time", as.numeric)
+  convertField("algorithm_features_cutoff_memory", as.numeric)
+  convertField("algorithm_features_deterministic", make.names)
+  convertField("algorithm_features_stochastic", make.names)
   convertField("default_steps", make.names)
   convertField("number_of_feature_steps", as.numeric)
 

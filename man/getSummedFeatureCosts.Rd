@@ -20,4 +20,3 @@ Default are all feature steps.}
 \description{
 Returns feature costs of scenario, summed over all instances.
 }
-

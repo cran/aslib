@@ -1,5 +1,8 @@
+aslib_0.1.2:
+- Update for HTML5 documentation pages.
+
 aslib_0.1.1:
 - Update for R 4.0 compatibility.
+
 aslib_0.1:
 - First submit to CRAN.
-

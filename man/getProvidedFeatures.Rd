@@ -4,7 +4,7 @@
 \alias{getProvidedFeatures}
 \title{Return features that are useable for a given set of feature steps.}
 \usage{
-getProvidedFeatures(asscenario, steps)
+getProvidedFeatures(asscenario, steps, type)
 }
 \arguments{
 \item{asscenario}{[\code{\link{ASScenario}}]\cr
@@ -13,6 +13,9 @@ Algorithm selection scenario.}
 \item{steps}{[\code{character}]\cr
 Feature steps.
 Default are all feature steps.}
+
+\item{type}{[\code{character(1)}]
+Feature type (instance or algorithmic).}
 }
 \value{
 [\code{character}].
@@ -20,4 +23,3 @@ Default are all feature steps.}
 \description{
 Return features that are useable for a given set of feature steps.
 }
-
